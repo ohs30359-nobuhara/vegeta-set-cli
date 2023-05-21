@@ -36,6 +36,12 @@ func Output(path string) error {
 				return errors.New("GET scenario create fail")
 			}
 			builder.WriteString(scenarioTxt)
+		case "POST":
+			scenarioTxt, e := buildPostScenario(scenario, values)
+			if e != nil {
+				return errors.New("POST scenario create fail")
+			}
+			builder.WriteString(scenarioTxt)
 		}
 	}
 
@@ -66,11 +72,21 @@ func buildGetScenario(scenario config.Scenario, values []string) (string, error)
 			if len(param) == 0 {
 				continue
 			}
-			builder.WriteString(fmt.Sprintf("GET %s?%s \n", scenario.Url, strings.ReplaceAll(param, "?", "")))
+			builder.WriteString(fmt.Sprintf("GET %s?%s \n\n", scenario.Url, strings.ReplaceAll(param, "?", "")))
 		}
 	} else {
 		// パラメータがなければ単純に URLをセット
-		builder.WriteString(fmt.Sprintf("GET %s \n", scenario.Url))
+		builder.WriteString(fmt.Sprintf("GET %s \n\n", scenario.Url))
+	}
+
+	return builder.String(), nil
+}
+
+func buildPostScenario(scenario config.Scenario, values []string) (string, error) {
+	builder := strings.Builder{}
+
+	for _, val := range values {
+		builder.WriteString(fmt.Sprintf("POST %s \n@%s \n\n", scenario.Url, val))
 	}
 
 	return builder.String(), nil
