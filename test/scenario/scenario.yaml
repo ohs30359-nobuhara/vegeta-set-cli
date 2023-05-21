@@ -1,0 +1,14 @@
+scenario:
+  - url: http://localhost:3000
+    method: GET
+    ratio: 10%
+  - url: http://localhost:3000/item
+    method: GET
+    ratio: 45%
+    value: ./values/item
+  - url: http://localhost:3000/user
+    method: POST
+    ratio: 45%
+    value: ./values/user
+rate: 100
+

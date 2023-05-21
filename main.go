@@ -1,6 +1,6 @@
 package main
 
-import "ohs30359/vegita-cli/cmd"
+import "ohs30359/vegeta-cli/cmd"
 
 func main() {
 	cmd.Execute()

@@ -2,14 +2,25 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"ohs30359/vegeta-cli/internal/scenario"
 	"os"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "vegita-set-cli",
+	Use:   "setup",
 	Short: "",
 	Long:  ``,
+	Run: func(c *cobra.Command, args []string) {
+		path, e := c.PersistentFlags().GetString("scenario")
+		if e != nil {
+			panic(e.Error())
+		}
+
+		if e := scenario.Output(path); e != nil {
+			panic(e.Error())
+		}
+	},
 }
 
 func Execute() {
@@ -20,5 +31,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().StringP("scenario", "s", "", "./xxx/xxx")
 }

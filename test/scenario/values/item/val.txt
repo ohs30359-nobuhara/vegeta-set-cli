@@ -1,0 +1,2 @@
+name=本
+name=紙&price=100
