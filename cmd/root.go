@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"ohs30359/vegeta-cli/internal/scenario"
+	"ohs30359/vegeta-cli/internal"
 	"os"
 )
 
@@ -17,7 +17,7 @@ var rootCmd = &cobra.Command{
 			panic(e.Error())
 		}
 
-		if e := scenario.Output(path); e != nil {
+		if e := internal.Output(path); e != nil {
 			panic(e.Error())
 		}
 	},

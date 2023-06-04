@@ -11,4 +11,4 @@ scenario:
     ratio: 45%
     value: ./values/user
 rate: 100
-
+duration: 100s

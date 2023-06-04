@@ -3,6 +3,7 @@ package config
 import (
 	"gopkg.in/yaml.v3"
 	"os"
+	"time"
 )
 
 type Scenario struct {
@@ -13,8 +14,9 @@ type Scenario struct {
 }
 
 type Config struct {
-	Scenario []Scenario `yaml:"scenario"`
-	Rate     int        `yaml:"rate"`
+	Scenario []Scenario    `yaml:"scenario"`
+	Rate     int           `yaml:"rate"`
+	Duration time.Duration `yaml:"duration"`
 }
 
 func Load(path string) (Config, error) {
