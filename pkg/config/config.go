@@ -9,14 +9,19 @@ import (
 type Scenario struct {
 	Url    string  `yaml:"url"`
 	Method string  `yaml:"method"`
-	Ratio  string  `yaml:"ratio"`
+	Ratio  int     `yaml:"ratio"`
 	Value  *string `yaml:"value"`
+}
+
+type Tester struct {
+	Limit int `yaml:"limit"`
 }
 
 type Config struct {
 	Scenario []Scenario    `yaml:"scenario"`
 	Rate     int           `yaml:"rate"`
 	Duration time.Duration `yaml:"duration"`
+	Tester   Tester        `yaml:"tester"`
 }
 
 func Load(path string) (Config, error) {

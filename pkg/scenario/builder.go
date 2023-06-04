@@ -3,25 +3,23 @@ package scenario
 import (
 	"errors"
 	"fmt"
+	"math"
 	"ohs30359/vegeta-cli/pkg/config"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type Builder struct {
 	scenario config.Scenario
-	max      int
-	duration time.Duration
+	conf     config.Config
 	root     string
 }
 
-func NewBuilder(scenario config.Scenario, max int, duration time.Duration, root string) Builder {
+func NewBuilder(scenario config.Scenario, conf config.Config, root string) Builder {
 	return Builder{
 		scenario: scenario,
-		max:      max,
-		duration: duration,
+		conf:     conf,
 		root:     root,
 	}
 }
@@ -37,8 +35,20 @@ func (own *Builder) CreateTargetBuffer(scenario config.Scenario, values []string
 	return "", errors.New("scenario Method must be GET or POST")
 }
 
-func (own *Builder) CreateScenarioBuffer(targetFile string) string {
-	return fmt.Sprintf("vegeta attack -targets=%s -rate=%s/s -duration %ss", targetFile, strconv.Itoa(own.max), own.duration)
+func (own *Builder) CreateScenarioBuffer(scenario config.Scenario, targetFile string) []string {
+	// testerの性能上限を超えている場合は シナリオを分割する
+	rps := int(float64(own.conf.Rate) * (float64(scenario.Ratio) / 100))
+	if rps > own.conf.Tester.Limit {
+		var results []string
+		rounded := int(math.Ceil(float64(rps) / float64(own.conf.Tester.Limit)))
+		for i := 0; i < rounded; i++ {
+			results = append(results, fmt.Sprintf("vegeta attack -targets=%s -rate=%s/s -duration %s", targetFile, strconv.Itoa(rps/rounded), own.conf.Duration))
+		}
+
+		return results
+	}
+
+	return []string{fmt.Sprintf("vegeta attack -targets=%s -rate=%s/s -duration %ss", targetFile, strconv.Itoa(rps), own.conf.Duration)}
 }
 
 func (own *Builder) createGetBuffer(scenario config.Scenario, values []string) (string, error) {

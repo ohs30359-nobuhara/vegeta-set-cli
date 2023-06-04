@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"ohs30359/vegeta-cli/pkg/config"
 	"ohs30359/vegeta-cli/pkg/dir"
@@ -14,6 +15,15 @@ func Output(path string) error {
 	conf, e := config.Load(fmt.Sprintf("%s/scenario.yaml", path))
 	if e != nil {
 		return e
+	}
+
+	// ratioがトータルで100%になっているかを判定
+	ratioSum := 0
+	for _, scenario := range conf.Scenario {
+		ratioSum += scenario.Ratio
+	}
+	if ratioSum != 100 {
+		return errors.New("\"ratio\" must sum up to 100")
 	}
 
 	if e := os.MkdirAll("dist", 0755); e != nil {
@@ -57,7 +67,7 @@ func Output(path string) error {
 
 		}
 
-		builder := scenarioBuilder.NewBuilder(scenario, conf.Rate, conf.Duration, path)
+		builder := scenarioBuilder.NewBuilder(scenario, conf, path)
 		targetBuf, e := builder.CreateTargetBuffer(scenario, valueFilePaths)
 		if e != nil {
 			return e
@@ -68,8 +78,12 @@ func Output(path string) error {
 			return e
 		}
 
-		if e := file.Write(scenarioDirPath+"/scenario.sh", []byte(builder.CreateScenarioBuffer("./target.txt"))); e != nil {
-			return e
+		// 実行シェルを作成
+		files := builder.CreateScenarioBuffer(scenario, "./target.txt")
+		for j, buf := range files {
+			if e := file.Write(fmt.Sprintf("%s/scenario_%s.sh", scenarioDirPath, strconv.Itoa(j)), []byte(buf)); e != nil {
+				return e
+			}
 		}
 	}
 
