@@ -31,13 +31,13 @@ func Output(path string) error {
 
 		switch scenario.Method {
 		case "GET":
-			scenarioTxt, e := buildGetScenario(scenario, values)
+			scenarioTxt, e := buildGetValues(scenario, values)
 			if e != nil {
 				return errors.New("GET scenario create fail")
 			}
 			builder.WriteString(scenarioTxt)
 		case "POST":
-			scenarioTxt, e := buildPostScenario(scenario, values)
+			scenarioTxt, e := buildPostValues(scenario, values)
 			if e != nil {
 				return errors.New("POST scenario create fail")
 			}
@@ -55,7 +55,8 @@ func Output(path string) error {
 	return nil
 }
 
-func buildGetScenario(scenario config.Scenario, values []string) (string, error) {
+// buildGetValues GETのパラメータを生成
+func buildGetValues(scenario config.Scenario, values []string) (string, error) {
 	builder := strings.Builder{}
 
 	// パラメータ一覧がある場合は ファイルを読み込んでクエリパラメータをURLに付与する
@@ -67,7 +68,6 @@ func buildGetScenario(scenario config.Scenario, values []string) (string, error)
 
 		queryParams := strings.Split(string(content), "\n")
 
-		// TODO: ここで割合計算をする
 		for _, param := range queryParams {
 			if len(param) == 0 {
 				continue
@@ -82,7 +82,8 @@ func buildGetScenario(scenario config.Scenario, values []string) (string, error)
 	return builder.String(), nil
 }
 
-func buildPostScenario(scenario config.Scenario, values []string) (string, error) {
+// buildPostValues POSTのパラメータを作成
+func buildPostValues(scenario config.Scenario, values []string) (string, error) {
 	builder := strings.Builder{}
 
 	for _, val := range values {
