@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"ohs30359/vegeta-cli/pkg/config"
-	"ohs30359/vegeta-cli/pkg/dir"
 	"os"
 	"strconv"
 	"strings"
@@ -27,12 +26,12 @@ func NewBuilder(scenario config.Scenario, max int, duration time.Duration, root 
 	}
 }
 
-func (own *Builder) CreateTargetBuffer(scenario config.Scenario) (string, error) {
+func (own *Builder) CreateTargetBuffer(scenario config.Scenario, values []string) (string, error) {
 	switch scenario.Method {
 	case "GET":
-		return own.createGetBuffer(scenario)
+		return own.createGetBuffer(scenario, values)
 	case "POST":
-		return own.createPostBuffer(scenario)
+		return own.createPostBuffer(scenario, values)
 	}
 
 	return "", errors.New("scenario Method must be GET or POST")
@@ -42,13 +41,8 @@ func (own *Builder) CreateScenarioBuffer(targetFile string) string {
 	return fmt.Sprintf("vegeta attack -targets=%s -rate=%s/s -duration %ss", targetFile, strconv.Itoa(own.max), own.duration)
 }
 
-func (own *Builder) createGetBuffer(scenario config.Scenario) (string, error) {
+func (own *Builder) createGetBuffer(scenario config.Scenario, values []string) (string, error) {
 	builder := strings.Builder{}
-
-	values, e := own.getValues(scenario.Value)
-	if e != nil {
-		return "", e
-	}
 
 	// パラメータ一覧がある場合は ファイルを読み込んでクエリパラメータをURLに付与する
 	if len(values) != 0 {
@@ -74,24 +68,12 @@ func (own *Builder) createGetBuffer(scenario config.Scenario) (string, error) {
 
 }
 
-func (own *Builder) createPostBuffer(scenario config.Scenario) (string, error) {
+func (own *Builder) createPostBuffer(scenario config.Scenario, values []string) (string, error) {
 	builder := strings.Builder{}
-
-	values, e := own.getValues(scenario.Value)
-	if e != nil {
-		return "", e
-	}
 
 	for _, val := range values {
 		builder.WriteString(fmt.Sprintf("POST %s \n@%s \n\n", scenario.Url, val))
 	}
 
 	return builder.String(), nil
-}
-
-func (own *Builder) getValues(path *string) ([]string, error) {
-	if path == nil {
-		return nil, nil
-	}
-	return dir.Scan(fmt.Sprintf("%s/%s", own.root, *path))
 }
